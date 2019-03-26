@@ -26,12 +26,12 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="前言本章主要介绍Collection集合相关知识，结合面试中会提到的相关问题进行知识点的梳理。希望能帮到大家~ 基于JDK1.8，如有错误，还望大家能够指出！ 涉及的Collection集合相关面试题  1.什么是集合？ 2.AVA中集合类型都有哪些？有什么特点？ 3.说一说集合的父类Collection？ 4.数组和集合都有哪些区别？ 5.说一说迭代器Iterator 6.Collection接">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/dCCj1byj80siaEUAl0w9wRu6shMJ3eeQ7JcaasDsln6HIdaS7hG3AYVZTJ8kvgcwQialF4olibGh4b7yiclsAI02Zw/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
-<meta property="og:updated_time" content="2019-03-26T08:13:57.528Z">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/3/20/1699b162f7c55697?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+<meta property="og:updated_time" content="2019-03-26T08:24:40.521Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="通过面试题，让我们来了解Collection">
 <meta name="twitter:description" content="前言本章主要介绍Collection集合相关知识，结合面试中会提到的相关问题进行知识点的梳理。希望能帮到大家~ 基于JDK1.8，如有错误，还望大家能够指出！ 涉及的Collection集合相关面试题  1.什么是集合？ 2.AVA中集合类型都有哪些？有什么特点？ 3.说一说集合的父类Collection？ 4.数组和集合都有哪些区别？ 5.说一说迭代器Iterator 6.Collection接">
-<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/dCCj1byj80siaEUAl0w9wRu6shMJ3eeQ7JcaasDsln6HIdaS7hG3AYVZTJ8kvgcwQialF4olibGh4b7yiclsAI02Zw/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2019/3/20/1699b162f7c55697?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
   <!-- Canonical links -->
   <link rel="canonical" href="http://yoursite.com/2019/01/02/通过面试题，让我们来了解Collection/index.html">
   
@@ -413,7 +413,7 @@
 <p>同时集合中还有另外一种类型：Map(映射)。</p>
 <p>Map特点：键值对；键不可以重复；值可以重复；</p>
 <p>Map集合中存储的是键值对，键不能重复，值可以重复。根据键得到值，对map集合遍历时先得到键的set集合，对set集合进行遍历，得到相应的值。</p>
-<h3 id="3-说一说集合的父类Collection？"><a href="#3-说一说集合的父类Collection？" class="headerlink" title="3.说一说集合的父类Collection？"></a>3.说一说集合的父类Collection？</h3><h4 id="3-1-Collection-体系结构图"><a href="#3-1-Collection-体系结构图" class="headerlink" title="3.1 Collection 体系结构图"></a>3.1 Collection 体系结构图</h4><p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/dCCj1byj80siaEUAl0w9wRu6shMJ3eeQ7JcaasDsln6HIdaS7hG3AYVZTJ8kvgcwQialF4olibGh4b7yiclsAI02Zw/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img"></p>
+<h3 id="3-说一说集合的父类Collection？"><a href="#3-说一说集合的父类Collection？" class="headerlink" title="3.说一说集合的父类Collection？"></a>3.说一说集合的父类Collection？</h3><h4 id="3-1-Collection-体系结构图"><a href="#3-1-Collection-体系结构图" class="headerlink" title="3.1 Collection 体系结构图"></a>3.1 Collection 体系结构图</h4><p><img src="https://user-gold-cdn.xitu.io/2019/3/20/1699b162f7c55697?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img"></p>
 <p>CollectionList:有序集合，允许相同元素和null）  –LinkedList （非同步，允许相同元素和null，遍历效率低插入和删除效率高）  –ArrayList （非同步，允许相同元素和null，实现了动态大小的数组，遍历效率高，用的多）  –Vector（同步，允许相同元素和null，效率低）      —Stack（继承自Vector，实现一个后进先出的堆栈Set （无序集合，不允许相同元素，最多有一个null元素）    –HashSet(无序集合，不允许相同元素，最多有一个null元素)</p>
 <p>Map （没有实现collection接口，key不能重复，value可以重复，一个key映射一个value）  –Hashtable （实现Map接口，同步，不允许null作为key和value，用自定义的类当作key的话要复写hashCode和eques方法，）  –HashMap （实现Map接口，非同步，允许null作为key和value，用的多）  –WeakHashMap（实现Map接口）</p>
 <h4 id="3-2-Collection-中的主要方法"><a href="#3-2-Collection-中的主要方法" class="headerlink" title="3.2 Collection 中的主要方法"></a>3.2 Collection 中的主要方法</h4><p>（1）添加boolean add(E o);boolean add(Collection&lt;? extends E&gt; c);</p>
@@ -451,7 +451,10 @@
 <li>HashMap类 　　在后续的文章中我们将一一详细介绍这些类的相关特性！</li>
 </ul>
 <h2 id="文末"><a href="#文末" class="headerlink" title="文末"></a>文末</h2><p>本章节介绍了Collection接口中的大部分可能在面试过程中会出现的内容，并没有详细去介绍其子类及其实现相关的原理。这方面的内容会放在后续的章节中去详细介绍。</p>
-<p>作者：<em>Coder编程</em><br>链接：<a href="https://mp.weixin.qq.com/s?__biz=MzIwMTg3NzYyOA==&amp;mid=2247483669&amp;idx=1&amp;sn=b726d81212af6a857d59cd488c0e0aa2&amp;chksm=96e67006a191f9103b3c790e04d5ed4ddcbc76f3efbb52e6ce8349619f56a68e72aca156571e&amp;token=424171447&amp;lang=zh_CN#rd" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzIwMTg3NzYyOA==&amp;mid=2247483669&amp;idx=1&amp;sn=b726d81212af6a857d59cd488c0e0aa2&amp;chksm=96e67006a191f9103b3c790e04d5ed4ddcbc76f3efbb52e6ce8349619f56a68e72aca156571e&amp;token=424171447&amp;lang=zh_CN#rd</a><br>来源：微信公众号：<em>Coder编程</em><br>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+<p>作者：Coder编程</p>
+<p>链接：<a href="https://juejin.im/post/5c91df2fe51d454b5c53a335" target="_blank" rel="noopener">https://juejin.im/post/5c91df2fe51d454b5c53a335</a></p>
+<p>来源：掘金</p>
+<p>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
 
       
     </div>
