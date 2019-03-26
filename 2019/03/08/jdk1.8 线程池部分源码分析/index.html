@@ -22,16 +22,16 @@
 <meta name="keywords" content="线程池">
 <meta property="og:type" content="article">
 <meta property="og:title" content="jdk1.8 线程池部分源码分析">
-<meta property="og:url" content="http://yoursite.com/2019/01/02/jdk1.8 线程池部分源码分析/index.html">
+<meta property="og:url" content="http://yoursite.com/2019/03/08/jdk1.8 线程池部分源码分析/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="普通线程 1.实现：继承Thread或者实现Runnable接口 1.继承Thread，仅仅只能单继承2.实现Runnable接口（可实现内部资源共享），接口可以多实现3.经典问题：窗口卖票 2.实例化对象3.执行任务4.销毁线程回收资源 思考：当多个资源需要开启线程来处理的时候，我们怎么办？是否一直在重复下面的流程：    create -&amp;gt; run -&amp;gt; destroy复制代码我们">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-08T08:04:25.715Z">
+<meta property="og:updated_time" content="2019-03-26T08:32:14.607Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="jdk1.8 线程池部分源码分析">
 <meta name="twitter:description" content="普通线程 1.实现：继承Thread或者实现Runnable接口 1.继承Thread，仅仅只能单继承2.实现Runnable接口（可实现内部资源共享），接口可以多实现3.经典问题：窗口卖票 2.实例化对象3.执行任务4.销毁线程回收资源 思考：当多个资源需要开启线程来处理的时候，我们怎么办？是否一直在重复下面的流程：    create -&amp;gt; run -&amp;gt; destroy复制代码我们">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://yoursite.com/2019/01/02/jdk1.8 线程池部分源码分析/index.html">
+  <link rel="canonical" href="http://yoursite.com/2019/03/08/jdk1.8 线程池部分源码分析/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -242,7 +242,7 @@
   <div class="widget">
     <h3 class="widget-title">归档</h3>
     <div class="widget-body">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">4</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -261,25 +261,10 @@
                 <a class="category-link" href="/categories/分布式锁/">分布式锁</a>
               </p>
               <p class="item-title">
-                <a href="/2019/03/04/分布式锁之Redis实现/" class="title">分布式锁之Redis实现</a>
+                <a href="/2019/03/26/分布式锁之Redis实现/" class="title">分布式锁之Redis实现</a>
               </p>
               <p class="item-date">
-                <time datetime="2019-03-04T08:45:27.633Z" itemprop="datePublished">2019-03-04</time>
-              </p>
-            </div>
-          </li>
-          
-          <li>
-            
-            <div class="item-inner">
-              <p class="item-category">
-                
-              </p>
-              <p class="item-title">
-                <a href="/2019/01/02/hello-world/" class="title">Hello World</a>
-              </p>
-              <p class="item-date">
-                <time datetime="2019-01-02T07:49:20.670Z" itemprop="datePublished">2019-01-02</time>
+                <time datetime="2019-03-25T16:00:00.000Z" itemprop="datePublished">2019-03-26</time>
               </p>
             </div>
           </li>
@@ -291,25 +276,10 @@
                 <a class="category-link" href="/categories/内存模型/">内存模型</a>
               </p>
               <p class="item-title">
-                <a href="/2019/01/02/Java内存模型深度剖析/" class="title">Java内存模型深度剖析</a>
+                <a href="/2019/03/08/Java内存模型深度剖析/" class="title">Java内存模型深度剖析</a>
               </p>
               <p class="item-date">
-                <time datetime="2019-01-02T07:49:20.670Z" itemprop="datePublished">2019-01-02</time>
-              </p>
-            </div>
-          </li>
-          
-          <li>
-            
-            <div class="item-inner">
-              <p class="item-category">
-                <a class="category-link" href="/categories/Collection/">Collection</a>
-              </p>
-              <p class="item-title">
-                <a href="/2019/01/02/通过面试题，让我们来了解Collection/" class="title">通过面试题，让我们来了解Collection</a>
-              </p>
-              <p class="item-date">
-                <time datetime="2019-01-02T07:49:20.670Z" itemprop="datePublished">2019-01-02</time>
+                <time datetime="2019-03-07T16:00:00.000Z" itemprop="datePublished">2019-03-08</time>
               </p>
             </div>
           </li>
@@ -321,10 +291,25 @@
                 <a class="category-link" href="/categories/线程池/">线程池</a>
               </p>
               <p class="item-title">
-                <a href="/2019/01/02/jdk1.8 线程池部分源码分析/" class="title">jdk1.8 线程池部分源码分析</a>
+                <a href="/2019/03/08/jdk1.8 线程池部分源码分析/" class="title">jdk1.8 线程池部分源码分析</a>
               </p>
               <p class="item-date">
-                <time datetime="2019-01-02T07:49:20.670Z" itemprop="datePublished">2019-01-02</time>
+                <time datetime="2019-03-07T16:00:00.000Z" itemprop="datePublished">2019-03-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Collection/">Collection</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/02/26/通过面试题，让我们来了解Collection/" class="title">通过面试题，让我们来了解Collection</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-02-25T16:00:00.000Z" itemprop="datePublished">2019-02-26</time>
               </p>
             </div>
           </li>
@@ -366,8 +351,8 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2019/01/02/jdk1.8 线程池部分源码分析/" class="article-date">
-	  <time datetime="2019-01-02T07:49:20.670Z" itemprop="datePublished">2019-01-02</time>
+	<a href="/2019/03/08/jdk1.8 线程池部分源码分析/" class="article-date">
+	  <time datetime="2019-03-07T16:00:00.000Z" itemprop="datePublished">2019-03-08</time>
 	</a>
 </span>
         
@@ -385,7 +370,7 @@
 
         
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/01/02/jdk1.8 线程池部分源码分析/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/03/08/jdk1.8 线程池部分源码分析/#comments" class="article-comment-link">评论</a></span>
         
       </div>
     </div>
@@ -692,7 +677,7 @@ public Future&lt;?&gt; submit(Runnable task) {
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://yoursite.com/2019/01/02/jdk1.8 线程池部分源码分析/" title="jdk1.8 线程池部分源码分析" target="_blank" rel="external">http://yoursite.com/2019/01/02/jdk1.8 线程池部分源码分析/</a>
+      <a href="http://yoursite.com/2019/03/08/jdk1.8 线程池部分源码分析/" title="jdk1.8 线程池部分源码分析" target="_blank" rel="external">http://yoursite.com/2019/03/08/jdk1.8 线程池部分源码分析/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -739,9 +724,13 @@ public Future&lt;?&gt; submit(Runnable task) {
   <ul class="pager pull-left">
     
     <li class="prev">
-      <a href="/2019/01/02/通过面试题，让我们来了解Collection/" title="通过面试题，让我们来了解Collection"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+      <a href="/2019/03/08/Java内存模型深度剖析/" title="Java内存模型深度剖析"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
     </li>
     
+    
+    <li class="next">
+      <a href="/2019/02/26/通过面试题，让我们来了解Collection/" title="通过面试题，让我们来了解Collection"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
     
     
     <li class="toggle-toc">
