@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://i.loli.net/2019/03/28/5c9ca8fcab44b.png">
 <meta property="og:image" content="https://i.loli.net/2019/03/28/5c9ca92666453.png">
-<meta property="og:updated_time" content="2019-03-28T11:00:33.357Z">
+<meta property="og:updated_time" content="2019-03-28T11:17:34.877Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Docker(一)：Docker入门教程">
 <meta name="twitter:description" content="如今Docker的使用已经非常普遍，特别在一线互联网公司。使用Docker技术可以帮助企业快速水平扩展服务，从而到达弹性部署业务的能力。在云服务概念兴起之后，Docker的使用场景和范围进一步发展，如今在微服务架构越来越流行的情况下，微服务+Docker的完美组合，更加方便微服务架构运维部署落地。 本文详细解释介绍Docker入门相关内容，后期重点关注Docker在微服务体系中的使用。在了解Doc">
@@ -44,9 +44,9 @@
   <link rel="stylesheet" href="/css/style.css">
   
   
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitment@0.0.3/style/default.min.css">
   
   
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
   
 </head>
 
@@ -482,7 +482,7 @@
 <p>执行docker pull centos会将Centos这个仓库下面的所有镜像下载到本地repository。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://yeasy.gitbooks.io/docker_practice/content/" target="_blank" rel="noopener">Docker — 从入门到实践</a><br><a href="https://tech.meituan.com/docker_introduction.html" target="_blank" rel="noopener">Docker系列之一：入门介绍</a><br><a href="http://www.ruanyifeng.com/blog/2018/02/docker-tutorial.html" target="_blank" rel="noopener">Docker 入门教程</a></p>
 <p>作者：<a href="http://www.ityouknow.com" target="_blank" rel="noopener"> 纯洁的微笑-ityouknow</a></p>
-<p>链接：<a href="http://www.ityouknow.com/docker/2018/03/07/docker-introduction.html" target="_blank" rel="noopener">http://www.ityouknow.com/docker/2018/03/07/docker-introduction.html</a>&gt;</p>
+<p>链接：<a href="http://www.ityouknow.com/docker/2018/03/07/docker-introduction.html" target="_blank" rel="noopener">http://www.ityouknow.com/docker/2018/03/07/docker-introduction.html</a></p>
 <p>来源：本文版权归作者，欢迎转载，但未经作者同意必须保留此段声明，且在文章页面明显位置给出原文连接，否则保留追究法律责任的权利。</p>
 
       
@@ -526,7 +526,7 @@
     
   <section id="comments">
   	
-           
+
     
   </section>
 
@@ -624,23 +624,24 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
    
     
-  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
-  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
-  <script type="text/javascript">
-  var gitalk = new Gitalk({
-    clientID: '3304e33e876b545fd7f6',
-    clientSecret: '4b2c427cb84f56f33a868215e155a70e90067e25',
-    repo: 'znnspace.github.io',
-    owner: 'znnspace',
-    admin: ['znnspace'],
-    id: md5(location.pathname),
-    distractionFreeMode: true
-  })
-  gitalk.render('comments')
-  </script>
+<script src="//cdn.jsdelivr.net/npm/gitment@0.0.3/dist/gitment.browser.min.js"></script>
+<script>
+var gitment = new Gitment({
+  // id默认为当前页面url，如果url后带参数或锚点，gitment要重新初始化
+  // https://github.com/imsun/gitment/issues/55
+  // 解决方案：id:window.location.pathname,或者将id设置为当前页面标题
+  id: 'Docker(一)：Docker入门教程', 
+  owner: 'znnspace', // 可以是你的GitHub用户名，也可以是github id
+  repo: 'znnspace.github.io',
+  oauth: {
+    client_id: '3304e33e876b545fd7f6',
+    client_secret: '4b2c427cb84f56f33a868215e155a70e90067e25',
+  }
+})
+gitment.render('comments')
+</script>
 
-      
+
 
 
 
