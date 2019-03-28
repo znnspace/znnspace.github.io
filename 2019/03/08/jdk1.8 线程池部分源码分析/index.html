@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>jdk1.8 线程池部分源码分析 | znnspace - Java Developer</title>
+  <meta name="description" content="普通线程 1.实现：继承Thread或者实现Runnable接口 1.继承Thread，仅仅只能单继承2.实现Runnable接口（可实现内部资源共享），接口可以多实现3.经典问题：窗口卖票 2.实例化对象3.执行任务4.销毁线程回收资源 思考：当多个资源需要开启线程来处理的时候，我们怎么办？是否一直在重复下面的流程：    create -&amp;gt; run -&amp;gt; destroy复制代码我们">
+<meta name="keywords" content="线程池">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jdk1.8 线程池部分源码分析">
+<meta property="og:url" content="http://yoursite.com/2019/03/08/jdk1.8 线程池部分源码分析/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="普通线程 1.实现：继承Thread或者实现Runnable接口 1.继承Thread，仅仅只能单继承2.实现Runnable接口（可实现内部资源共享），接口可以多实现3.经典问题：窗口卖票 2.实例化对象3.执行任务4.销毁线程回收资源 思考：当多个资源需要开启线程来处理的时候，我们怎么办？是否一直在重复下面的流程：    create -&amp;gt; run -&amp;gt; destroy复制代码我们">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-26T08:32:14.607Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="jdk1.8 线程池部分源码分析">
+<meta name="twitter:description" content="普通线程 1.实现：继承Thread或者实现Runnable接口 1.继承Thread，仅仅只能单继承2.实现Runnable接口（可实现内部资源共享），接口可以多实现3.经典问题：窗口卖票 2.实例化对象3.执行任务4.销毁线程回收资源 思考：当多个资源需要开启线程来处理的时候，我们怎么办？是否一直在重复下面的流程：    create -&amp;gt; run -&amp;gt; destroy复制代码我们">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://yoursite.com/2019/03/08/jdk1.8 线程池部分源码分析/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center theme-purple" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/znnspace" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">znn</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shanghai, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/znnspace" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Collection/">Collection</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/elk/">elk</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/内存模型/">内存模型</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式锁/">分布式锁</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/线程池/">线程池</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Collection/">Collection</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/">Docker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elk/">elk</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存模型/">内存模型</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式锁/">分布式锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程池/">线程池</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Collection/" style="font-size: 13px;">Collection</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/elk/" style="font-size: 13px;">elk</a> <a href="/tags/内存模型/" style="font-size: 13px;">内存模型</a> <a href="/tags/分布式锁/" style="font-size: 13px;">分布式锁</a> <a href="/tags/线程池/" style="font-size: 13px;">线程池</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Docker/">Docker</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/28/Docker(一)：Docker入门教程/" class="title">Docker(一)：Docker入门教程</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-27T16:00:00.000Z" itemprop="datePublished">2019-03-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/elk/">elk</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/27/单机部署 ELK/" class="title">单机部署 ELK</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-26T16:00:00.000Z" itemprop="datePublished">2019-03-27</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/分布式锁/">分布式锁</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/26/分布式锁之Redis实现/" class="title">分布式锁之Redis实现</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-25T16:00:00.000Z" itemprop="datePublished">2019-03-26</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/内存模型/">内存模型</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/08/Java内存模型深度剖析/" class="title">Java内存模型深度剖析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-07T16:00:00.000Z" itemprop="datePublished">2019-03-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/线程池/">线程池</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/08/jdk1.8 线程池部分源码分析/" class="title">jdk1.8 线程池部分源码分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-07T16:00:00.000Z" itemprop="datePublished">2019-03-08</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-jdk1.8 线程池部分源码分析" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      jdk1.8 线程池部分源码分析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/03/08/jdk1.8 线程池部分源码分析/" class="article-date">
+	  <time datetime="2019-03-07T16:00:00.000Z" itemprop="datePublished">2019-03-08</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/线程池/">线程池</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/线程池/">线程池</a>
+  </span>
+
+
+        
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/03/08/jdk1.8 线程池部分源码分析/#comments" class="article-comment-link">评论</a></span>
+        
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>普通线程</p>
+<p>1.实现：继承Thread或者实现Runnable接口</p>
+<p>1.继承Thread，仅仅只能单继承<br>2.实现Runnable接口（可实现内部资源共享），接口可以多实现<br>3.经典问题：窗口卖票</p>
+<p>2.实例化对象<br>3.执行任务<br>4.销毁线程回收资源</p>
+<p>思考：<br>当多个资源需要开启线程来处理的时候，我们怎么办？是否一直在重复下面的流程：<br>    create -&gt; run -&gt; destroy<br>复制代码我们知道计算机的每次运行都是需要大量的资源消耗，5个线程的操作可能没有影响，5w个呢？  五万次创建和销毁才有仅仅五万次的执行吗？执行任务可能花费了大量的时间来处理这些创建和销毁。</p>
+<p>线程池</p>
+<p>特点</p>
+<p>1.解决处理器单元内多个线程的执行问题<br>2.减少处理器单元闲置时间<br>3.增加了处理器单元工作时间内的吞吐能力（为什么这么说？我们减少了多个任务每次线程的创建和销毁浪费，提高了任务执行效率）</p>
+<p>组成</p>
+<p>1.线程池管理器（ThreadPool）：负责创建、管理、销毁线程池，以及添加任务<br>2.工作线程（PoolWorker）：无任务则等待，可循环、重复执行任务<br>3.任务接口（Task）：每个任务必须实现接口，工作线程负责调度任务的执行，规定了任务的入口，以及任务完成后的收尾工作以及任务执行状态等等<br>4.任务队列（TaskQueue）：存放没有处理的任务，提供任务缓冲机制</p>
+<p>eg：超市结账：收营员服务组，单个收营员，收银工作，等待被收银的人群<br>JDK线程池类：java.util.concurrent.Executors和JDK线程池执行器接口：java.util.concurrent.Executor<br>在Executors中，jdk提供了一下相关的线程池，如下：</p>
+<p>静态方法<br>创建的线程池类型<br>返回值的实际实现</p>
+<p>newFixedThreadPool(int)<br>固定线程池<br>ThreadPoolExecutor</p>
+<p>newWorkStealingPool()<br>处理器核心数的并行线程池<br>ForkJoinPool</p>
+<p>newSingleThreadExecutor()<br>一个线程的单独线程池<br>FinalizableDelegatedExecutorService</p>
+<p>newCachedThreadPool()<br>缓存线程池<br>ThreadPoolExecutor</p>
+<p>newSingleThreadScheduledExecutor()<br>单独线程定时线程池<br>DelegatedScheduledExecutorService</p>
+<p>newScheduledThreadPool(int)<br>定时线程池<br>ScheduledThreadPoolExecutor</p>
+<p>newSingleThreadExecutor() 一个线程的线程池</p>
+<p>为什么这里我要拿一个线程的线程池来说明呢？其实我们把简单的搞定复杂的也是演变过来的。先上码：<br>public static ExecutorService newSingleThreadExecutor() {<br>    return new FinalizableDelegatedExecutorService<br>        (new ThreadPoolExecutor(1, 1,<br>            0L, TimeUnit.MILLISECONDS,<br>                new LinkedBlockingQueue<runnable>()));<br>}</runnable></p>
+<p>public static ExecutorService newSingleThreadExecutor(ThreadFactory threadFactory) {<br>    return new FinalizableDelegatedExecutorService<br>        (new ThreadPoolExecutor(1, 1,<br>            0L, TimeUnit.MILLISECONDS,<br>                new LinkedBlockingQueue<runnable>(),<br>                    threadFactory));<br>}<br>复制代码我们可以看到上面方法的返回值都是ExecutorService，但实际上实例化的是FinalizableDelegatedExecutorService，我们进去看看源码，如下：<br>static class FinalizableDelegatedExecutorService extends DelegatedExecutorService {<br>    //构造方法<br>    FinalizableDelegatedExecutorService(ExecutorService executor) {<br>        super(executor);<br>    }</runnable></p>
+<pre><code>//对象销毁的时候调用
+protected void finalize() {
+    super.shutdown();
+}
+</code></pre><p>}<br>复制代码上面的代码我们可以明显的看到FinalizableDelegatedExecutorService仅仅是对DelegatedExecutorService的封装，唯一实现的就是在对象销毁的时候将ExecutorService结束。<br>到这里我们就应该返回来分析DelegatedExecutorService，以及上面的方法中的具体代码。<br>我们看看默认的单线程线程池的实现，如下：<br>new FinalizableDelegatedExecutorService<br>        (new ThreadPoolExecutor(1, 1,<br>            0L, TimeUnit.MILLISECONDS,<br>                new LinkedBlockingQueue<runnable>()));<br>//此处的代码实现了一个ExecutorService，分别有几个参数？何解？</runnable></p>
+<p>//<br>public class ThreadPoolExecutor extends AbstractExecutorService {<br>    public ThreadPoolExecutor(int corePoolSize,<br>                              int maximumPoolSize,<br>                              long keepAliveTime,<br>                              TimeUnit unit,<br>                              BlockingQueue<runnable> workQueue) {<br>        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,<br>             Executors.defaultThreadFactory(), defaultHandler);<br>    }<br>}<br>//我们可以看到几个参数的字面意思分别是：<br>//corePoolSize 核心线程数量，包括空闲线程<br>//maximumPoolSize 最大线程数量<br>//keepAliveTime 保持活跃时间（参照后续源码，这里应该是：当线程数大于核心时，此为终止前多余的空闲线程等待新任务的最长时间）<br>//unit keepAliveTime 参数的时间单位<br>//workQueue 执行前用于保持任务的队列。此队列仅保持由 execute方法提交的 Runnable任务<br>//Executors.defaultThreadFactory() 默认线程工厂<br>//defaultHandler 超出线程和任务队列的任务的处理程序，实现为：new AbortPolicy()，当然这里默认是没有处理的，需要我们手动实现</runnable></p>
+<p>//这里，我们接着看默认的线程工厂，毕竟线程池核心是需要线程来执行任务，所以此处先看线程来源。<br>static class DefaultThreadFactory implements ThreadFactory {<br>    //池数量，指定原子操作<br>    private static final AtomicInteger poolNumber = new AtomicInteger(1);<br>    //线程组<br>    private final ThreadGroup group;<br>    //线程数量，指定原子操作<br>    private final AtomicInteger threadNumber = new AtomicInteger(1);<br>    //线程名称前缀<br>    private final String namePrefix;</p>
+<pre><code>DefaultThreadFactory() {
+    //获取系统安全管理器
+    SecurityManager s = System.getSecurityManager();
+    //创建线程组，由是否获取系统安全管理器决定
+    group = (s != null) ? s.getThreadGroup() :
+                          Thread.currentThread().getThreadGroup();
+    //构造线程名称
+    namePrefix = &quot;pool-&quot; +
+                  poolNumber.getAndIncrement() +
+                 &quot;-thread-&quot;;
+}
+
+//创建线程
+public Thread newThread(Runnable r) {
+    //将线程组、Runnable接口（线程实际执行代码块）、线程名、线程所需要的堆栈大小为0
+    Thread t = new Thread(group, r,
+                          namePrefix + threadNumber.getAndIncrement(),
+                          0);
+    //如果为守护线程，取消守护状态，必须在线程执行前调用这个setDaemon方法
+    if (t.isDaemon())
+        t.setDaemon(false);
+    //默认任务优先级，值为5
+    if (t.getPriority() != Thread.NORM_PRIORITY)
+        t.setPriority(Thread.NORM_PRIORITY);
+    return t;
+}
+</code></pre><p>}<br>//上面的默认线程工厂，提供给了我们一个非守护线程的线程，由原子操作保证线程唯一，任务优先级默认（最低1，最高10，默认5，此处优先级为5）</p>
+<p>复制代码看了上面这些我们可以总结一下：单线程线程池，默认只有一个线程和一个线程池，等待新任务时间为0，添加了原子操作来绑定线程。<br>是不是到这里就完了？  当然没有，我们现在需要看看更加具体的ThreadPoolExecutor，才能更加深入明白线程池。<br>public class ThreadPoolExecutor extends AbstractExecutorService {<br>    /*<em>
+    </em>所有的构造方法均指向这里，所以我们看一下这个就足够<br>    */<br>    public ThreadPoolExecutor(int corePoolSize,<br>                              int maximumPoolSize,<br>                              long keepAliveTime,<br>                              TimeUnit unit,<br>                              BlockingQueue<runnable> workQueue,<br>                              ThreadFactory threadFactory,<br>                              RejectedExecutionHandler handler) {<br>        //参数检查，说明线程池不能线程=0，也不能最大线程数量不大于0切最大线程数量不能少于核心线程数量，等待任务最长时间不能小于0<br>        if (corePoolSize &lt; 0 ||<br>            maximumPoolSize &lt;= 0 ||<br>            maximumPoolSize &lt; corePoolSize ||<br>            keepAliveTime &lt; 0)<br>            throw new IllegalArgumentException();<br>        //等待任务队列、线程工厂、超任务队列的处理程序<br>        if (workQueue == null || threadFactory == null || handler == null)<br>            throw new NullPointerException();<br>        //上面的判断，可以看做是一种防御式编程，所有的问题预先处理，后续无需考虑类似问题<br>        //构造线程池相关设定阈值<br>        this.acc = System.getSecurityManager() == null ?<br>                null :<br>                AccessController.getContext();<br>        this.corePoolSize = corePoolSize;<br>        this.maximumPoolSize = maximumPoolSize;<br>        this.workQueue = workQueue;<br>        this.keepAliveTime = unit.toNanos(keepAliveTime);<br>        this.threadFactory = threadFactory;<br>        this.handler = handler;<br>    }<br>}</runnable></p>
+<p>//到了这里其实我们不必先追究具体的实现，还是先看看AbstractExecutorService吧。</p>
+<p>//抽象的执行服务<br>public abstract class AbstractExecutorService implements ExecutorService {</p>
+<pre><code>//执行方法
+private &lt;T&gt; T doInvokeAny(Collection&lt;? extends Callable&lt;T&gt;&gt; tasks,
+                          boolean timed, long nanos)
+    throws InterruptedException, ExecutionException, TimeoutException {
+    if (tasks == null)
+        throw new NullPointerException();
+    //获取任务数量
+    int ntasks = tasks.size();
+    if (ntasks == 0)
+        throw new IllegalArgumentException();
+    //任务集合
+    ArrayList&lt;Future&lt;T&gt;&gt; futures = new ArrayList&lt;Future&lt;T&gt;&gt;(ntasks);
+    //执行完成服务
+    ExecutorCompletionService&lt;T&gt; ecs =
+        new ExecutorCompletionService&lt;T&gt;(this);
+
+    try {
+        // 记录异常
+        ExecutionException ee = null;
+
+        //超时时间线
+        final long deadline = timed ? System.nanoTime() + nanos : 0L;
+        //使用迭代器获取任务
+        Iterator&lt;? extends Callable&lt;T&gt;&gt; it = tasks.iterator();
+
+        // 确定开始一项任务
+        futures.add(ecs.submit(it.next()));
+        //任务数量减少
+        --ntasks;
+        //正在执行任务标志
+        int active = 1;
+
+        //循环执行任务
+        for (;;) {
+            //获取任务队列中第一个任务
+            Future&lt;T&gt; f = ecs.poll();
+            //任务为空，如果还有任务则执行任务（任务数量减1，提交任务到执行队列，正在执行任务数量+1）
+            //正在执行任务数为0，说明任务执行完毕，中断任务循环
+            //若有超时检查，则执行超时检查机制
+            //上述情况都不满足，则取出任务队列头，并将其从队列移除
+            if (f == null) {
+                if (ntasks &gt; 0) {
+                    --ntasks;
+                    futures.add(ecs.submit(it.next()));
+                    ++active;
+                }
+                else if (active == 0)
+                    break;
+                else if (timed) {
+                    f = ecs.poll(nanos, TimeUnit.NANOSECONDS);
+                    if (f == null)
+                        throw new TimeoutException();
+                    nanos = deadline - System.nanoTime();
+                }
+                else
+                    f = ecs.take();
+            }
+
+            //任务不为空
+            if (f != null) {
+                //正在执行标志-1
+                --active;
+                try {
+                    //返回执行结果
+                    return f.get();
+                } catch (ExecutionException eex) {
+                    ee = eex;
+                } catch (RuntimeException rex) {
+                    ee = new ExecutionException(rex);
+                }
+            }
+        }
+
+        if (ee == null)
+            ee = new ExecutionException();
+        throw ee;
+
+    } finally {
+        //取消所有任务
+        for (int i = 0, size = futures.size(); i &lt; size; i++)
+            futures.get(i).cancel(true);
+    }
+}
+
+//执行方法
+public &lt;T&gt; List&lt;Future&lt;T&gt;&gt; invokeAll(Collection&lt;? extends Callable&lt;T&gt;&gt; tasks,
+                                     long timeout, TimeUnit unit)
+    throws InterruptedException {
+    if (tasks == null)
+        throw new NullPointerException();
+    long nanos = unit.toNanos(timeout);
+    //和上面类似，这里也是创建任务队列
+    ArrayList&lt;Future&lt;T&gt;&gt; futures = new ArrayList&lt;Future&lt;T&gt;&gt;(tasks.size());
+    boolean done = false;
+    //迭代进行任务执行
+    try {
+        //创建任务，并添加到任务队列
+        for (Callable&lt;T&gt; t : tasks)
+            futures.add(newTaskFor(t));
+        //设置超时时间标记
+        final long deadline = System.nanoTime() + nanos;
+        final int size = futures.size();
+
+        //在执行器没有多少多并行性的情况下，交替执行时间检查和调用。
+        for (int i = 0; i &lt; size; i++) {
+            execute((Runnable)futures.get(i));
+            nanos = deadline - System.nanoTime();
+            //任务超时，返回任务队列
+            if (nanos &lt;= 0L)
+                return futures;
+        }
+
+        //遍历任务并返回任务执行结果
+        for (int i = 0; i &lt; size; i++) {
+            Future&lt;T&gt; f = futures.get(i);
+            if (!f.isDone()) {
+                //超时
+                if (nanos &lt;= 0L)
+                    return futures;
+                try {
+                    //给定执行时间等待任务完成并返回结果
+                    f.get(nanos, TimeUnit.NANOSECONDS);
+                } catch (CancellationException ignore) {
+                } catch (ExecutionException ignore) {
+                } catch (TimeoutException toe) {
+                    return futures;
+                }
+                nanos = deadline - System.nanoTime();
+            }
+        }
+        done = true;
+        return futures;
+    } finally {
+        //未完成则取消执行
+        if (!done)
+            for (int i = 0, size = futures.size(); i &lt; size; i++)
+                futures.get(i).cancel(true);
+    }
+}
+
+/**
+*创建任务队列
+*/
+protected &lt;T&gt; RunnableFuture&lt;T&gt; newTaskFor(Runnable runnable, T value) {
+    return new FutureTask&lt;T&gt;(runnable, value);
+}
+
+/**
+* 提交任务到执行队列
+*/
+public Future&lt;?&gt; submit(Runnable task) {
+    if (task == null) throw new NullPointerException();
+    RunnableFuture&lt;Void&gt; ftask = newTaskFor(task, null);
+    execute(ftask);
+    return ftask;
+}
+</code></pre><p>}<br>复制代码通过上面的代码我们已经基本了解了一个线程池是如何创建任务队列并执行任务的，所以在这里我们只需要关注一些关键的ThreadPoolExecutor的方法就能了解线程池是如何工作的，并且对应的几种模式的线程池都可以推导出来。<br>首先在这次看源码之前我们要胡乱思索一番，整理一下线程池的执行大概流程：</p>
+<p>我们前面简单的说过几个ThreadPoolExecutor的主要参数，我们下面再仔细总结一下：<br>public class ThreadPoolExecutor extends AbstractExecutorService {</p>
+<pre><code>public ThreadPoolExecutor(int corePoolSize,
+                          int maximumPoolSize,
+                          long keepAliveTime,
+                          TimeUnit unit,
+                          BlockingQueue&lt;Runnable&gt; workQueue,
+                          ThreadFactory threadFactory,
+                          RejectedExecutionHandler handler) {
+    if (corePoolSize &lt; 0 ||
+        maximumPoolSize &lt;= 0 ||
+        maximumPoolSize &lt; corePoolSize ||
+        keepAliveTime &lt; 0)
+        throw new IllegalArgumentException();
+    if (workQueue == null || threadFactory == null || handler == null)
+        throw new NullPointerException();
+    this.corePoolSize = corePoolSize;
+    this.maximumPoolSize = maximumPoolSize;
+    this.workQueue = workQueue;
+    this.keepAliveTime = unit.toNanos(keepAliveTime);
+    this.threadFactory = threadFactory;
+    this.handler = handler;
+}
+</code></pre><p>}<br>复制代码<br>corePoolSize：该线程池中核心线程数最大值</p>
+<p>核心线程：线程池新建线程的时候，如果当前线程总数小于corePoolSize，则新建的是核心线程，如果超过corePoolSize，则新建的线程不是核心线程。核心线程默认情况下会一直存活在线程池中，即使这个核心线程啥也不干(闲置状态)。如果指定ThreadPoolExecutor的allowCoreThreadTimeOut这个属性为true，那么核心线程如果不干活(闲置状态)的话，超过一定时间(时长下面参数决定)，就会被销毁掉。</p>
+<p>maximumPoolSize： 该线程池中线程总数最大值</p>
+<p>线程总数 = 核心线程数 + 非核心线程数。</p>
+<p>keepAliveTime：该线程池中非核心线程闲置超时时长</p>
+<p>一个非核心线程，如果不干活(闲置状态)的时长超过这个参数所设定的时长，就会被销毁掉，如果设置allowCoreThreadTimeOut = true，则会作用于核心线程。</p>
+<p>unit：keepAliveTime的单位</p>
+<p>TimeUnit是一个枚举类型，其包括：<br>NANOSECONDS ： 1微毫秒 = 1微秒 / 1000<br>MICROSECONDS ： 1微秒 = 1毫秒 / 1000<br>MILLISECONDS ： 1毫秒 = 1秒 /1000<br>SECONDS ： 秒<br>MINUTES ： 分<br>HOURS ： 小时<br>DAYS ： 天</p>
+<p>workQueue：线程池中的任务队列：维护着等待执行的Runnable对象</p>
+<p>当所有的核心线程都在干活时，新添加的任务会被添加到这个队列中等待处理，如果队列满了，则新建非核心线程执行任务。</p>
+<p>threadFactory：创建线程的方式。</p>
+<p>handler：异常处理程序。</p>
+<p>既然已经知道了任务执行，那么任务是怎么排队的呢？<br>public void execute(Runnable command) {<br>        if (command == null)<br>            throw new NullPointerException();<br>        /*</p>
+<pre><code>     * 1. 如果运行的线程少于corepoolSize大小，新任务会直接开启新的线程执行。
+     * 对addWorker的调用原子性地检查运行状态和workerCount，从而通过返回false防止假警报，假警报会在不应该的情况下添加线程。
+     *
+     * 2. 如果一个任务成功的加入队列，我们需要再次检查是否需要开启新的线程来执行。
+     * 可能原因有：已有任务执行完毕，或者线程池已经被结束。
+     * 
+     *
+     * 3. 如果不能对任务进行排队，则尝试添加一个新任务线程。
+     * 如果它失败了，我们知道我们已经关闭或饱和了所以拒绝这个任务。
+     */
+
+    //运行状态标签
+    int c = ctl.get();
+    //正在执行的线程数 &lt; 核心线程数 ，则立即执行任务
+    if (workerCountOf(c) &lt; corePoolSize) {
+        if (addWorker(command, true))
+            return;
+        c = ctl.get();
+    }
+    //再次检查是否运行且没超过任务队列容量
+    if (isRunning(c) &amp;&amp; workQueue.offer(command)) {
+        int recheck = ctl.get();
+        //需要执行的任务不在运行状态且不在等待队列，则将这个任务异常抛出
+        if (! isRunning(recheck) &amp;&amp; remove(command))
+            reject(command);
+        //运行任务数量为空，则将核心线程外的线程任务置空
+        else if (workerCountOf(recheck) == 0)
+            addWorker(null, false);
+    }
+    //超过核心线程数且其他线程任务也添加失败，抛出异常
+    else if (!addWorker(command, false))
+        reject(command);
+}
+</code></pre><p>复制代码看到这里我们已经模模糊糊的明白了任务排队执行，所有的任务队列都是一样的排队执行，那么我们任务队列又有哪些呢？</p>
+<p>LinkedBlockingQueue：线性阻塞队列。接收到任务，如果没超过corePoolSize，则创建新线程执行，否则进入阻塞队列等待</p>
+<p>ArrayBlockingQueue：数组阻塞队列。数组特诊是长度固定，也就是这个队列长度固定。接收到新任务，如果没超过corePoolSize，则创建新线程执行，如果超过，则创建新线程（线程总数&lt;maximumPoolSize）执行。如果新任务既不能在队列中等待，又不能执行，抛出异常。</p>
+<p>SynchronousQueue：同步队列。 既然是同步队列，说明新任务来了就执行。也就是核心线程数量无限大。</p>
+<p>DelayQueue：延迟队列，听名字也知道任务要延迟执行，这个队列接收到任务时，首先先入队，只有达到了指定的延时时间，才会执行任务。</p>
+<p>也就是说到了这里，我们基本已经分析了线程池的几个核心：jdk自带线程池种类、线程池内的线程工厂（用于生产线程）、线程池任务执行、线程池任务排队、线程池队列类型。我们总结一张图，可以结束本篇文章，当然其他类型的线程池具体实现，请自行查看源码。</p>
+<p>思考：在Java开发中还有哪些类似的东西是这种操作的呢？</p>
+<p>作者：pc859107393<br>链接：<a href="https://juejin.im/post/5ba28fb36fb9a05d2c43a57a" target="_blank" rel="noopener">https://juejin.im/post/5ba28fb36fb9a05d2c43a57a</a><br>来源：掘金<br>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://yoursite.com/2019/03/08/jdk1.8 线程池部分源码分析/" title="jdk1.8 线程池部分源码分析" target="_blank" rel="external">http://yoursite.com/2019/03/08/jdk1.8 线程池部分源码分析/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/znnspace" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/znnspace" target="_blank"><span class="text-dark">znn</span><small class="ml-1x">Web Developer &amp; Designer</small></a></h3>
+        <div>Because of love, so flash.</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/03/08/Java内存模型深度剖析/" title="Java内存模型深度剖析"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/02/26/通过面试题，让我们来了解Collection/" title="通过面试题，让我们来了解Collection"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,wechat,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/znnspace" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '3304e33e876b545fd7f6',
+    clientSecret: '4b2c427cb84f56f33a868215e155a70e90067e25',
+    repo: 'znnspace.github.io',
+    owner: 'znnspace',
+    admin: ['znnspace'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>
