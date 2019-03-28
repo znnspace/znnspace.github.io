@@ -51,14 +51,14 @@
   </url>
   
   <url>
-    <loc>http://yoursite.com/books/index.html</loc>
+    <loc>http://yoursite.com/categories/index.html</loc>
     
     <lastmod>2019-01-02T07:50:11.790Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://yoursite.com/categories/index.html</loc>
+    <loc>http://yoursite.com/tags/index.html</loc>
     
     <lastmod>2019-01-02T07:50:11.790Z</lastmod>
     
@@ -79,7 +79,7 @@
   </url>
   
   <url>
-    <loc>http://yoursite.com/tags/index.html</loc>
+    <loc>http://yoursite.com/books/index.html</loc>
     
     <lastmod>2019-01-02T07:50:11.790Z</lastmod>
     
