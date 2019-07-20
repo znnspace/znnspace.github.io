@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/about/index.html</loc>
+    
+    <lastmod>2019-07-20T05:24:25.464Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2019/03/28/Docker(%E4%B8%80)%EF%BC%9ADocker%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/</loc>
     
     <lastmod>2019-03-28T11:17:34.877Z</lastmod>
@@ -44,9 +51,9 @@
   </url>
   
   <url>
-    <loc>http://yoursite.com/about/index.html</loc>
+    <loc>http://yoursite.com/books/index.html</loc>
     
-    <lastmod>2019-01-18T07:23:07.452Z</lastmod>
+    <lastmod>2019-01-02T07:50:11.790Z</lastmod>
     
   </url>
   
@@ -58,7 +65,7 @@
   </url>
   
   <url>
-    <loc>http://yoursite.com/books/index.html</loc>
+    <loc>http://yoursite.com/links/index.html</loc>
     
     <lastmod>2019-01-02T07:50:11.790Z</lastmod>
     
@@ -66,13 +73,6 @@
   
   <url>
     <loc>http://yoursite.com/repository/index.html</loc>
-    
-    <lastmod>2019-01-02T07:50:11.790Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/links/index.html</loc>
     
     <lastmod>2019-01-02T07:50:11.790Z</lastmod>
     
